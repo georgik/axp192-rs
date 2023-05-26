@@ -1,7 +1,7 @@
 #![no_std]
 
 // Based on https://github.com/tuupola/axp192
-
+#![allow(dead_code)]
 const AXP192_ADDRESS: u8 = 0x34;
 /* Power control registers */
 const AXP192_POWER_STATUS: u8 = 0x00;
@@ -108,7 +108,7 @@ pub enum Command {
     Dcdc3Voltage(bool),
     Ldo23Voltage(bool),
     Gpio1Control(bool),
-    Gpio2Control(bool)
+    Gpio2Control(bool),
 }
 
 pub enum DataFormat<'a> {
@@ -125,13 +125,13 @@ impl Command {
         let (data, len) = match self {
             // Command structure: address, command, data, count & 0xf1
             //Command::Dcdc3Voltage(on) => ([AXP192_ADDRESS, AXP192_LDO2 , 0x0], 3),
-            Command::Dcdc13Ldo23Control(on) => ([AXP192_DCDC13_LDO23_CONTROL, 119], 2),
-            Command::Dcdc2Slope(on) => ([AXP192_DCDC2_SLOPE, 0x0], 2),
-            Command::Dcdc1Voltage(on) => ([AXP192_DCDC1_VOLTAGE, 106], 2),
-            Command::Dcdc3Voltage(on) => ([AXP192_DCDC3_VOLTAGE, 104], 2),
-            Command::Ldo23Voltage(on) => ([AXP192_LDO23_VOLTAGE, 242], 2),
-            Command::Gpio1Control(on) => ([AXP192_GPIO1_CONTROL, 0x0], 2),
-            Command::Gpio2Control(on) => ([AXP192_GPIO2_CONTROL, 104], 2),
+            Command::Dcdc13Ldo23Control(_on) => ([AXP192_DCDC13_LDO23_CONTROL, 119], 2),
+            Command::Dcdc2Slope(_on) => ([AXP192_DCDC2_SLOPE, 0x0], 2),
+            Command::Dcdc1Voltage(_on) => ([AXP192_DCDC1_VOLTAGE, 106], 2),
+            Command::Dcdc3Voltage(_on) => ([AXP192_DCDC3_VOLTAGE, 104], 2),
+            Command::Ldo23Voltage(_on) => ([AXP192_LDO23_VOLTAGE, 242], 2),
+            Command::Gpio1Control(_on) => ([AXP192_GPIO1_CONTROL, 0x0], 2),
+            Command::Gpio2Control(_on) => ([AXP192_GPIO2_CONTROL, 104], 2),
         };
         iface.send_commands(DataFormat::U8(&data[0..len]))
     }
@@ -166,16 +166,15 @@ where
 
         match cmd {
             DataFormat::U8(data) => {
+                self.i2c
+                    .write_read(self.addr, &[data[0]], &mut data_buf)
+                    .map_err(|_| Axp192Error::WriteError)?;
+                //println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
 
-            let result = self.i2c
-                .write_read(self.addr, &[data[0]], &mut data_buf)
-                .map_err(|_| Axp192Error::WriteError);
-            //println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
-
-            //println!("write value for command {:?}: {:?}", data[0], data[1]);
-            self.i2c
-                .write(self.addr, &data)
-                .map_err(|_| Axp192Error::WriteError)
+                //println!("write value for command {:?}: {:?}", data[0], data[1]);
+                self.i2c
+                    .write(self.addr, data)
+                    .map_err(|_| Axp192Error::WriteError)
             }
         }
     }
@@ -192,8 +191,8 @@ where
 }
 
 impl<I> Axp192<I>
-    where
-        I: Axp192ReadWrite,
+where
+    I: Axp192ReadWrite,
 {
     // Create a new AXP192 interface
     pub fn new(interface: I) -> Self {
@@ -213,7 +212,6 @@ impl<I> Axp192<I>
 
         Ok(())
     }
-
 }
 
 pub struct I2CInterface<I2C> {
@@ -224,7 +222,7 @@ pub struct I2CInterface<I2C> {
 
 impl<I2C> I2CInterface<I2C>
 where
-    I2C: embedded_hal::blocking::i2c::Write/*+ embedded_hal::blocking::i2c::WriteRead*/,
+    I2C: embedded_hal::blocking::i2c::Write, /*+ embedded_hal::blocking::i2c::WriteRead*/
 {
     /// Create new I2C interface for communication with a display driver
     pub fn new(i2c: I2C, addr: u8, data_byte: u8) -> Self {
@@ -245,7 +243,6 @@ where
 #[derive(Debug, Copy, Clone)]
 pub struct I2CPowerManagementInterface(());
 
-
 impl I2CPowerManagementInterface {
     pub fn new<I>(i2c: I) -> I2CInterface<I>
     where
@@ -262,6 +259,3 @@ impl I2CPowerManagementInterface {
         I2CInterface::new(i2c, address, 0x34)
     }
 }
-
-
-
