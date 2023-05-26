@@ -1,5 +1,5 @@
 // Based on https://github.com/tuupola/axp192
-
+#![allow(dead_code)]
 const AXP192_ADDRESS: u8 = 0x34;
 /* Power control registers */
 const AXP192_POWER_STATUS: u8 = 0x00;
@@ -123,13 +123,13 @@ impl Command {
         let (data, len) = match self {
             // Command structure: address, command, data, count & 0xf1
             //Command::Dcdc3Voltage(on) => ([AXP192_ADDRESS, AXP192_LDO2 , 0x0], 3),
-            Command::Dcdc13Ldo23Control(on) => ([AXP192_DCDC13_LDO23_CONTROL, 119], 2),
-            Command::Dcdc2Slope(on) => ([AXP192_DCDC2_SLOPE, 0x0], 2),
-            Command::Dcdc1Voltage(on) => ([AXP192_DCDC1_VOLTAGE, 106], 2),
-            Command::Dcdc3Voltage(on) => ([AXP192_DCDC3_VOLTAGE, 104], 2),
-            Command::Ldo23Voltage(on) => ([AXP192_LDO23_VOLTAGE, 242], 2),
-            Command::Gpio1Control(on) => ([AXP192_GPIO1_CONTROL, 0x0], 2),
-            Command::Gpio2Control(on) => ([AXP192_GPIO2_CONTROL, 104], 2),
+            Command::Dcdc13Ldo23Control(_on) => ([AXP192_DCDC13_LDO23_CONTROL, 119], 2),
+            Command::Dcdc2Slope(_on) => ([AXP192_DCDC2_SLOPE, 0x0], 2),
+            Command::Dcdc1Voltage(_on) => ([AXP192_DCDC1_VOLTAGE, 106], 2),
+            Command::Dcdc3Voltage(_on) => ([AXP192_DCDC3_VOLTAGE, 104], 2),
+            Command::Ldo23Voltage(_on) => ([AXP192_LDO23_VOLTAGE, 242], 2),
+            Command::Gpio1Control(_on) => ([AXP192_GPIO1_CONTROL, 0x0], 2),
+            Command::Gpio2Control(_on) => ([AXP192_GPIO2_CONTROL, 104], 2),
         };
         iface.send_commands(DataFormat::U8(&data[0..len]))
     }
@@ -164,15 +164,14 @@ where
 
         match cmd {
             DataFormat::U8(data) => {
-                let result = self
-                    .i2c
+                self.i2c
                     .write_read(self.addr, &[data[0]], &mut data_buf)
-                    .map_err(|_| Axp192Error::WriteError);
+                    .map_err(|_| Axp192Error::WriteError)?;
                 //println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
 
                 //println!("write value for command {:?}: {:?}", data[0], data[1]);
                 self.i2c
-                    .write(self.addr, &data)
+                    .write(self.addr, data)
                     .map_err(|_| Axp192Error::WriteError)
             }
         }

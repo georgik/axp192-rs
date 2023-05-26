@@ -46,6 +46,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: stable
-          components: clippy      
+          components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy -- -D warnings
+      - run: cargo clippy -- -A clippy::new-ret-no-self -D warnings
