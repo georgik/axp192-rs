@@ -1,3 +1,5 @@
+#![no_std]
+
 // Based on https://github.com/tuupola/axp192
 
 const AXP192_ADDRESS: u8 = 0x34;
