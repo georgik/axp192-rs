@@ -1,0 +1,11 @@
+[package]
+name = "axp192"
+version = "0.1.0"
+edition = "2021"
+authors = ["Juraj Michálek <juraj.michalek@gmail.com>"]
+license = "MIT"
+
+
+[dependencies]
+embedded-hal = "0.2"
+
