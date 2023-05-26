@@ -106,7 +106,7 @@ pub enum Command {
     Dcdc3Voltage(bool),
     Ldo23Voltage(bool),
     Gpio1Control(bool),
-    Gpio2Control(bool)
+    Gpio2Control(bool),
 }
 
 pub enum DataFormat<'a> {
@@ -164,16 +164,16 @@ where
 
         match cmd {
             DataFormat::U8(data) => {
+                let result = self
+                    .i2c
+                    .write_read(self.addr, &[data[0]], &mut data_buf)
+                    .map_err(|_| Axp192Error::WriteError);
+                //println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
 
-            let result = self.i2c
-                .write_read(self.addr, &[data[0]], &mut data_buf)
-                .map_err(|_| Axp192Error::WriteError);
-            //println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
-
-            //println!("write value for command {:?}: {:?}", data[0], data[1]);
-            self.i2c
-                .write(self.addr, &data)
-                .map_err(|_| Axp192Error::WriteError)
+                //println!("write value for command {:?}: {:?}", data[0], data[1]);
+                self.i2c
+                    .write(self.addr, &data)
+                    .map_err(|_| Axp192Error::WriteError)
             }
         }
     }
@@ -190,8 +190,8 @@ where
 }
 
 impl<I> Axp192<I>
-    where
-        I: Axp192ReadWrite,
+where
+    I: Axp192ReadWrite,
 {
     // Create a new AXP192 interface
     pub fn new(interface: I) -> Self {
@@ -211,7 +211,6 @@ impl<I> Axp192<I>
 
         Ok(())
     }
-
 }
 
 pub struct I2CInterface<I2C> {
@@ -222,7 +221,7 @@ pub struct I2CInterface<I2C> {
 
 impl<I2C> I2CInterface<I2C>
 where
-    I2C: embedded_hal::blocking::i2c::Write/*+ embedded_hal::blocking::i2c::WriteRead*/,
+    I2C: embedded_hal::blocking::i2c::Write, /*+ embedded_hal::blocking::i2c::WriteRead*/
 {
     /// Create new I2C interface for communication with a display driver
     pub fn new(i2c: I2C, addr: u8, data_byte: u8) -> Self {
@@ -243,7 +242,6 @@ where
 #[derive(Debug, Copy, Clone)]
 pub struct I2CPowerManagementInterface(());
 
-
 impl I2CPowerManagementInterface {
     pub fn new<I>(i2c: I) -> I2CInterface<I>
     where
@@ -260,6 +258,3 @@ impl I2CPowerManagementInterface {
         I2CInterface::new(i2c, address, 0x34)
     }
 }
-
-
-
