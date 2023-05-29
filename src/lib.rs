@@ -1,7 +1,7 @@
 #![no_std]
+#![allow(dead_code)]
 
 // Based on https://github.com/tuupola/axp192
-#![allow(dead_code)]
 const AXP192_ADDRESS: u8 = 0x34;
 /* Power control registers */
 const AXP192_POWER_STATUS: u8 = 0x00;
