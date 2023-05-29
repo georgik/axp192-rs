@@ -102,6 +102,7 @@ const AXP192_COULOMB_COUNTER: u8 = 0xff;
 
 //12, 25-28, 92-93
 pub enum Command {
+    ExtenDcdc2Control(bool),
     Dcdc13Ldo23Control(bool),
     Dcdc2Slope(bool),
     Dcdc1Voltage(bool),
@@ -125,6 +126,7 @@ impl Command {
         let (data, len) = match self {
             // Command structure: address, command, data, count & 0xf1
             //Command::Dcdc3Voltage(on) => ([AXP192_ADDRESS, AXP192_LDO2 , 0x0], 3),
+            Command::ExtenDcdc2Control(_on) => ([AXP192_EXTEN_DCDC2_CONTROL, 0xfb], 2),
             Command::Dcdc13Ldo23Control(_on) => ([AXP192_DCDC13_LDO23_CONTROL, 119], 2),
             Command::Dcdc2Slope(_on) => ([AXP192_DCDC2_SLOPE, 0x0], 2),
             Command::Dcdc1Voltage(_on) => ([AXP192_DCDC1_VOLTAGE, 106], 2),
@@ -209,6 +211,7 @@ where
         Command::Ldo23Voltage(true).send(&mut self.interface)?;
         Command::Gpio1Control(true).send(&mut self.interface)?;
         Command::Gpio2Control(true).send(&mut self.interface)?;
+        Command::ExtenDcdc2Control(true).send(&mut self.interface)?;
 
         Ok(())
     }
