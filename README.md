@@ -1,5 +1,11 @@
 # AXP192 Rust
 
+## Deprecation warning!
+
+This repo is deprecated. Please use: https://github.com/rcloran/axp192-rs.
+
+## Info
+
 [![CI](https://github.com/SergioGasquez/axp192-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/SergioGasquez/axp192-rs/actions/workflows/ci.yml)
 ![MSRV](https://img.shields.io/badge/MSRV-1.60-blue?style=flat-square)
 
